@@ -1,0 +1,30 @@
+<resources>
+
+    <string name="app_name">Autentificación Demo</string>
+    <string name="user">Usuario</string>
+    <string name="password">Password</string>
+    <string name="instructions">
+        Si lo prefierers puedes verificar tu identidad con tu huella digital.
+    </string>
+    <string name="instructions2">
+        Coloca tu huella digital en el botón de home.
+    </string>
+    <string name="message1">
+        Excediste el número de intentos fallidos
+    </string>
+    <string name="message2">
+        Intenta nuevamente en # segundos
+    </string>
+    <string name="auth_message1">
+        Error de autentificación:
+    </string>
+    <string name="auth_message2">
+        Autentificación fallida
+    </string>
+    <string name="auth_message3">
+        Ayuda:
+    </string>
+    <string name="auth_message4">
+        Autentificación exitosa
+    </string>
+</resources>
