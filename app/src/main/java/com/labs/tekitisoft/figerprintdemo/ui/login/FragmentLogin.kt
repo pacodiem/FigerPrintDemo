@@ -22,6 +22,7 @@ import com.labs.tekitisoft.figerprintdemo.R
 import com.labs.tekitisoft.figerprintdemo.ui.welcome.FragmentWelcome
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import java.io.IOException
 import java.security.*
@@ -36,6 +37,7 @@ import javax.crypto.SecretKey
  * Created by francisco.dominguez on 18/04/18.
  */
 class FragmentLogin : Fragment(){
+    private lateinit var fingerprintHandler : FingerprintHandler
     private var cipher: Cipher? = null
     private var keyStore: KeyStore? = null
     private var keyGenerator: KeyGenerator? = null
@@ -44,6 +46,7 @@ class FragmentLogin : Fragment(){
     private var cryptoObject: FingerprintManager.CryptoObject? = null
     private var fingerprintManager: FingerprintManager? = null
     private var keyguardManager: KeyguardManager? = null
+    private var timerDisposable: Disposable? = null
 
     @TargetApi(Build.VERSION_CODES.M)
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -108,22 +111,23 @@ class FragmentLogin : Fragment(){
             // Se crea el CryptoObject si no hubo problema al inicializarlo
             cryptoObject = FingerprintManager.CryptoObject(cipher!!)
             // Iniciar el proceso de autentificacion
-            val helper = FingerprintHandler(context, this)
-            helper.startAuth(fingerprintManager!!, cryptoObject!!)
+            fingerprintHandler = FingerprintHandler(context, this)
+            fingerprintHandler.startAuth(fingerprintManager!!, cryptoObject!!)
         }
     }
 
     fun resetSensor(){
         textView2?.text = "${getString(R.string.message1)}"
-        Observable.interval(1, TimeUnit.SECONDS)
+        timerDisposable = Observable.interval(1, TimeUnit.SECONDS)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext({
-                    textView2?.text = "${getString(R.string.message1)} \n ${getString(R.string.message2).replace("#", "$it")}"
+                    textView2?.text = "${getString(R.string.message1)} \n ${getString(R.string.message2).replace("#", "${TIMER_VALUE - it}")}"
                 })
                 .takeUntil({aLong -> aLong == TIMER_VALUE})
                 .doOnComplete({
                     initSensor()
+                    textView2?.text = "${getString(R.string.message3)}"
                 }).subscribe()
     }
 
@@ -196,6 +200,19 @@ class FragmentLogin : Fragment(){
             throw RuntimeException("Failed to init Cipher", e)
         } catch (e: InvalidKeyException) {
             throw RuntimeException("Failed to init Cipher", e)
+        }
+    }
+
+
+    override fun onPause() {
+        super.onPause()
+        fingerprintHandler.cancelFingerPrintSignal()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (timerDisposable != null) {
+            timerDisposable?.dispose()
         }
     }
 

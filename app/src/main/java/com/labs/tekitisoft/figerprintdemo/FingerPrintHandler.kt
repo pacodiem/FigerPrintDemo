@@ -34,30 +34,32 @@ class FingerprintHandler(private val context: Context, private val fragment : Fr
     }
 
     fun cancelFingerPrintSignal(){
-        cancellationSignal
-        //TODO ver como se hace la cancelacion de la senal y llamar al metodo desde el fragment destruction
-        // TODO investigar que metodo del fragmento se llama aldestruir o salir de la app o al ponerla en el back
+        cancellationSignal?.cancel()
     }
 
     override fun onAuthenticationError(errMsgId: Int,
                                        errString: CharSequence) {
-        Toast.makeText(context,
-                "${context.getString(R.string.auth_message1)}\n$errString",
-                Toast.LENGTH_LONG).show()
-        fragment.resetSensor()
+        if (errMsgId != 5) {
+            Toast.makeText(context,
+                    "${context.getString(R.string.auth_message1)}\n$errString",
+                    Toast.LENGTH_SHORT).show()
+        }
+        if ( errMsgId == 7) {
+            fragment.resetSensor()
+        }
     }
 
     override fun onAuthenticationFailed() {
         Toast.makeText(context,
                 "${context.getString(R.string.auth_message2)}",
-                Toast.LENGTH_LONG).show()
+                Toast.LENGTH_SHORT).show()
     }
 
     override fun onAuthenticationHelp(helpMsgId: Int,
                                       helpString: CharSequence) {
         Toast.makeText(context,
                 "${context.getString(R.string.auth_message3)}\n$helpString",
-                Toast.LENGTH_LONG).show()
+                Toast.LENGTH_SHORT).show()
     }
 
 
@@ -66,7 +68,7 @@ class FingerprintHandler(private val context: Context, private val fragment : Fr
 
         Toast.makeText(context,
                 "${context.getString(R.string.auth_message4)}",
-                Toast.LENGTH_LONG).show()
+                Toast.LENGTH_SHORT).show()
         fragment.addFragment()
     }
 

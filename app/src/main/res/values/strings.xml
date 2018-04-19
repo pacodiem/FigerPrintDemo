@@ -15,6 +15,9 @@
     <string name="message2">
         Intenta nuevamente en # segundos
     </string>
+    <string name="message3">
+        Intenta de nuevo ahora
+    </string>
     <string name="auth_message1">
         Error de autentificación:
     </string>
