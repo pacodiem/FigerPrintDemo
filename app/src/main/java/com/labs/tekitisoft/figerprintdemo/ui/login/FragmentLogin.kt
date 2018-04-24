@@ -13,6 +13,7 @@ import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.security.keystore.KeyProperties
 import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,13 +21,15 @@ import android.widget.TextView
 import com.labs.tekitisoft.figerprintdemo.FingerprintHandler
 import com.labs.tekitisoft.figerprintdemo.R
 import com.labs.tekitisoft.figerprintdemo.ui.welcome.FragmentWelcome
-import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import io.reactivex.schedulers.TestScheduler
+import io.reactivex.Observable
 import java.io.IOException
 import java.security.*
 import java.security.cert.CertificateException
+import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
@@ -53,6 +56,25 @@ class FragmentLogin : Fragment(){
         super.onCreate(savedInstanceState)
 
         val rootView = inflater!!.inflate(R.layout.fragment_login, container, false)
+
+        // Prueba de uso de flatMap y switch Map (no tienen nada que ver con el demo)
+        /*val list = listOf("Alpha", "Beta", "Gamma", "Delta", "Epsilon")
+
+        val scheduler = TestScheduler()
+
+        Observable.fromArray(list)
+                .flatMapIterable{list}
+                .flatMap{
+                    val delay = Random().nextInt(10).toLong()
+                    Observable.just("$it X").delay(delay,TimeUnit.SECONDS)
+                }
+                //.toList()
+                //.map{Log.d("RX MAP","$it")}
+                .doOnNext{Log.d(" ******* RX NEXT ******" ,"$it")}
+                .subscribe{Log.d("RX SUBSCRIBE","$it")}
+
+        Log.d("TEST", "Working")*/
+
 
         // Validar que la version sea al menos M
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
