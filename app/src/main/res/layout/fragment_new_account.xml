@@ -12,7 +12,6 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.labs.tekitisoft.figerprintdemo.MainActivity">
 
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -21,13 +20,12 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="16dp"/>
 
-
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Email" />
     <EditText
-        android:id="@+id/email_login"
+        android:id="@+id/email"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
@@ -39,7 +37,7 @@
         android:layout_height="wrap_content"
         android:text="Password" />
     <EditText
-        android:id="@+id/pass_login"
+        android:id="@+id/pass"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
@@ -47,43 +45,10 @@
         android:layout_marginBottom="16dp"/>
 
     <Button
-        android:id="@+id/button_login"
+        android:id="@+id/button_create_account"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Login"
+        android:text="Crear cuenta"
         android:layout_marginBottom="16dp"/>
-
-    <TextView
-        android:id="@+id/create_account"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:textAlignment="textEnd"
-        android:layout_marginBottom="32dp"
-        android:text="CREAR CUENTA" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/text_view"
-        android:layout_gravity="center_horizontal"/>
-
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:srcCompat="@drawable/ic_fingerprint_black_24px"
-        android:id="@+id/image_view"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="36dp" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/text_view2"
-        android:text="@string/instructions"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="27dp" />
-
-
 
 </LinearLayout>

@@ -17,7 +17,14 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.android.gms.tasks.Task
+import com.google.firebase.auth.AuthResult
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.labs.tekitisoft.figerprintdemo.FingerprintHandler
 import com.labs.tekitisoft.figerprintdemo.R
 import com.labs.tekitisoft.figerprintdemo.ui.welcome.FragmentWelcome
@@ -26,6 +33,8 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.schedulers.TestScheduler
 import io.reactivex.Observable
+import kotlinx.android.synthetic.main.fragment_login.*
+import kotlinx.android.synthetic.main.fragment_new_account.*
 import java.io.IOException
 import java.security.*
 import java.security.cert.CertificateException
@@ -40,7 +49,7 @@ import javax.crypto.SecretKey
  * Created by francisco.dominguez on 18/04/18.
  */
 class FragmentLogin : Fragment(){
-    private lateinit var fingerprintHandler : FingerprintHandler
+    private var fingerprintHandler : FingerprintHandler? = null
     private var cipher: Cipher? = null
     private var keyStore: KeyStore? = null
     private var keyGenerator: KeyGenerator? = null
@@ -50,12 +59,18 @@ class FragmentLogin : Fragment(){
     private var fingerprintManager: FingerprintManager? = null
     private var keyguardManager: KeyguardManager? = null
     private var timerDisposable: Disposable? = null
+    private lateinit var mAuth : FirebaseAuth
 
     @TargetApi(Build.VERSION_CODES.M)
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreate(savedInstanceState)
 
         val rootView = inflater!!.inflate(R.layout.fragment_login, container, false)
+
+        mAuth = FirebaseAuth.getInstance()
+
+        // Check if user is signed in (non-null) and update UI accordingly.
+        val currentUser = mAuth.currentUser
 
         // Prueba de uso de flatMap y switch Map (no tienen nada que ver con el demo)
         /*val list = listOf("Alpha", "Beta", "Gamma", "Delta", "Epsilon")
@@ -75,7 +90,6 @@ class FragmentLogin : Fragment(){
 
         Log.d("TEST", "Working")*/
 
-
         // Validar que la version sea al menos M
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
@@ -88,22 +102,22 @@ class FragmentLogin : Fragment(){
 
             // Validar que el dispositivo tiene sensor de huella digital
             if (!fingerprintManager!!.isHardwareDetected) {
-                textView!!.text = "Your device doesn't support fingerprint authentication"
+                textView!!.text = "Tu dispositivo no soporta autentificacion con huella digital"
             }
 
             // Validar que se otorgaron permisos para usar el sensor
             if (ActivityCompat.checkSelfPermission(context, Manifest.permission.USE_FINGERPRINT) != PackageManager.PERMISSION_GRANTED) {
-                textView!!.text = "Please enable the fingerprint permission"
+                textView!!.text = "Por favor otorga permisos de lectura de huella digital"
             }
 
             // Validar que se tiene registrada al menos una huella digital
             if (!fingerprintManager!!.hasEnrolledFingerprints()) {
-                textView!!.text = "No fingerprint configured. Please register at least one fingerprint in your device's Settings"
+                textView!!.text = "No hay huella digital configurada"
             }
 
             // Validar que se tiene asegurada la pantalla de bloqueo
             if (!keyguardManager!!.isKeyguardSecure) {
-                textView!!.text = "Please enable lockscreen security in your device's Settings"
+                textView!!.text = "Por favor activa el candado de pantalla en tu dispositivo"
             } else {
                 initSensor()
             }
@@ -112,8 +126,25 @@ class FragmentLogin : Fragment(){
         return rootView
     }
 
-    fun addFragment(){
-        val fragmentWelcome = FragmentWelcome.newInstance("Paco")
+    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        // Habilitando boton
+        //val btn_click_me = rootView.findViewById(R.id.create_account) as TextView
+        create_account.setOnClickListener{showNewAccountFragment()}
+        button_login.setOnClickListener { signInWithEmailAndPassword(email_login.text.toString(), pass_login.text.toString()) }
+    }
+
+    fun showNewAccountFragment(){
+        val fragmentWelcome = FragmentNewAccount.newInstance()
+        activity.supportFragmentManager // use this instead normal fragment manager to change viewPager successfully
+                .beginTransaction()
+                .replace(R.id.container, fragmentWelcome)
+                .addToBackStack(null)
+                .commit()
+    }
+
+    fun addFragment(userName : String){
+        val fragmentWelcome = FragmentWelcome.newInstance(userName)
         activity.supportFragmentManager // use this instead normal fragment manager to change viewPager successfully
                 .beginTransaction()
                 .replace(R.id.container, fragmentWelcome)
@@ -134,8 +165,26 @@ class FragmentLogin : Fragment(){
             cryptoObject = FingerprintManager.CryptoObject(cipher!!)
             // Iniciar el proceso de autentificacion
             fingerprintHandler = FingerprintHandler(context, this)
-            fingerprintHandler.startAuth(fingerprintManager!!, cryptoObject!!)
+            fingerprintHandler?.startAuth(fingerprintManager!!, cryptoObject!!)
         }
+    }
+
+    fun signInWithEmailAndPassword(email : String, password: String) {
+        mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(activity,
+                {
+                    if (it.isSuccessful()) {
+                        // Sign in success, update UI with the signed-in user's information
+                        Log.d("LOGIN", "signInWithEmail:success")
+                        val user = mAuth.getCurrentUser() as FirebaseUser
+                        Log.d("LOGIN", "${user.email}")
+                        addFragment("${user.email}")
+                    } else {
+                        // If sign in fails, display a message to the user.
+                        Toast.makeText(activity, "Usuario o password incorrecto",
+                                Toast.LENGTH_SHORT).show();
+                        //updateUI(null)
+                    }
+                })
     }
 
     fun resetSensor(){
@@ -228,7 +277,9 @@ class FragmentLogin : Fragment(){
 
     override fun onPause() {
         super.onPause()
-        fingerprintHandler.cancelFingerPrintSignal()
+        if (fingerprintHandler != null)
+            fingerprintHandler?.cancelFingerPrintSignal()
+
     }
 
     override fun onDestroy() {

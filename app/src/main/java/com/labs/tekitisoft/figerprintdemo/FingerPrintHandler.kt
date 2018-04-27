@@ -69,7 +69,7 @@ class FingerprintHandler(private val context: Context, private val fragment : Fr
         Toast.makeText(context,
                 "${context.getString(R.string.auth_message4)}",
                 Toast.LENGTH_SHORT).show()
-        fragment.addFragment()
+        fragment.addFragment("Paco")
     }
 
 }
